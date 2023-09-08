@@ -1,0 +1,191 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- <script src="https://code.jquery.com/jquery-3.6.4.min.js"
+        integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script> -->
+</head>
+
+<style>
+    form {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        padding: 150px;
+    }
+
+
+
+    input {
+        text-align: center;
+        width: 300px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        display: inline;
+        align-items: center;
+        font-size: 15px;
+
+    }
+
+    button {
+        -webkit-appearance: none;
+        background: #009879;
+        border: 2px solid;
+        border-radius: 4px;
+        outline: none;
+        padding: 0.5em 0.8em;
+        color: #ffffff;
+        font-size: 1em;
+        font-family: "Quicksand", sans-serif;
+        font-weight: bold;
+        cursor: pointer;
+        justify-content: center;
+        align-items: center;
+        width: 142px;
+        text-align: center;
+    }
+
+    .file-upload__button:active {
+        background: #00745d;
+        width: right;
+        justify-content: center;
+        align-items: center;
+    }
+
+    header {
+        background-color: blue;
+        padding: 20px;
+        text-align: center;
+    }
+
+    h1 {
+        color: white;
+        font-size: 24px;
+        margin: 10px;
+    }
+
+    nav ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 10px 0;
+    }
+
+    nav ul li {
+        display: inline;
+        margin-right: 10px;
+    }
+
+    nav ul li a {
+        text-decoration: none;
+        color: #333;
+    }
+
+    .file_input {
+        display: inline-flex;
+    }
+</style>
+
+<body>
+    <header>
+        <h1>ESP Saftey</h1>
+    </header>
+
+    <div>
+        <form id="form-1">
+
+            <div class="file_input">
+                <div>
+                    <span style="font-size:1.5rem; font-weight:bold; margin-right:1rem;">Specification Document</span>
+                    <input class="file-upload__input" type="file" name="specific_path" id="file2">
+                    <link rel="stylesheet"
+                        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+                    <i class="fas fa-eye" onclick="SpecificPreviewDoc()"></i>
+                </div>
+
+                <br><br>
+
+
+                <div>
+                    <span style="font-size:1.5rem; font-weight:bold; margin-right:1rem;">Tender Document</span>
+                    <input class="file-upload__input" type="file" name="document_path" id="file1">
+
+                    <link rel="stylesheet"
+                        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+                    <i class="fas fa-eye" onclick="MyPreviewDoc()"></i>
+
+                </div>
+
+            </div>
+            <br></br>
+            <br></br>
+            <div style="display: flex;gap: 3rem;width: 47%;justify-content: start;">
+
+                <button id="submit_data" type="submit">Submit</button>
+
+                <button id=download_button type="button" disabled onclick="downloadCSV()">Download</button>
+
+
+            </div>
+
+        </form>
+
+
+    </div>
+    <script>
+        var form = document.getElementById('form-1')
+        function onSubmit(e) {
+            e.preventDefault();
+            console.log('Data collection start')
+            const file1 = document.getElementById("file1").files[0];
+            const file2 = document.getElementById("file2").files[0];
+            const formData = new FormData();
+            formData.append("document_path", file1);
+            formData.append("specific_path", file2);
+            fetch('/ocr/document', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (response.status === 200) {
+                        // Status code is 200 (OK)
+                        console.log('Request successful');
+                        alert("click on download for download your result")
+                        console.log(response.json());
+                        const download_button = document.getElementById("download_button")
+                        download_button.disabled = false;
+                    }
+                    else {
+                        console.log('Request failed');
+                        alert("comparison failed")
+                    }
+                })
+                .catch(err => console.log('error while fetching data.....', err))
+        };
+        form.addEventListener('submit', onSubmit)
+
+        function MyPreviewDoc() {
+            pdffile = document.getElementById("file1").files[0];
+            pdffile_url = URL.createObjectURL(pdffile);
+            var pdfWindow = window.open(pdffile_url, '_blank', 'width=800, height=600');
+            // document.querySelector('#previewPdf').setAttribute('src', pdffile_url);
+        }
+        function SpecificPreviewDoc() {
+            pdffile = document.getElementById("file2").files[0];
+            pdffile_url = URL.createObjectURL(pdffile);
+            // $('#previewPdf').attr('src', pdffile_url);
+            var pdfWindow = window.open(pdffile_url, '_blank', 'width=800, height=600');
+        }
+
+
+        function downloadCSV() {
+            window.location.href = '/ocr/download';
+        }
+
+    </script>
+
+
+</body>
+
+</html>
